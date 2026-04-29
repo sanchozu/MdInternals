@@ -5,7 +5,7 @@ Windows GUI для запуска операций MdInternals: конверта
 
 ## Системные требования
 - Windows 10/11 x64
-- .NET 6 SDK (для сборки)
+- .NET 8 SDK (для сборки)
 
 ## Сборка
 ```bash
@@ -40,9 +40,9 @@ dotnet publish MdInternals.Gui/MdInternals.Gui.csproj \
 - Проверка доступности функциональности декомпилятора/БД с понятными предупреждениями.
 
 ## Ограничения
-- В публичном API ядра не найдена готовая функция полного XML export/rebuild: добавлен TODO и безопасное предупреждение.
+- В публичном API ядра не найдена готовая функция полного XML export/rebuild: в CI-safe варианте добавлен TODO и безопасный summary-экспорт без прямой ссылки на legacy core.
 - В публичном API ядра не найден прямой OP-code decompiler API.
-- В окружении Linux GUI не запускается, поскольку проект `net6.0-windows`.
+- В окружении Linux GUI не запускается, поскольку проект `net8.0-windows`.
 
 ## Troubleshooting
 - Ошибка `NETSDK1100`: собирать/публиковать проект на Windows с установленным Desktop targeting pack.

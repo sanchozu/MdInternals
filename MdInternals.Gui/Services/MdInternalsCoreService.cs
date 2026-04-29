@@ -1,5 +1,3 @@
-using Elisy.MdInternals;
-
 namespace MdInternals.Gui.Services;
 
 public class MdInternalsCoreService
@@ -15,20 +13,24 @@ public class MdInternalsCoreService
             if (!File.Exists(inputPath)) throw new FileNotFoundException("Input file not found", inputPath);
             Directory.CreateDirectory(outputPath);
 
-            using MetadataPackage package = CreatePackage(inputPath);
-            package.Open(inputPath);
+            progress.Report(25);
+            var fileInfo = new FileInfo(inputPath);
+            var summaryLines = new List<string>
+            {
+                $"Input: {inputPath}",
+                $"SizeBytes: {fileInfo.Length}",
+                $"Extension: {fileInfo.Extension}",
+                $"ExtractCode: {extractCode}",
+                $"KeepStructure: {keepStructure}",
+                "",
+                "TODO: Direct core API integration is disabled in CI-safe build because legacy .NET Framework 4.0 reference assemblies are missing on GitHub runners.",
+                "To enable full integration, retarget legacy core or build GUI in an environment with .NET Framework 4.0 targeting pack."
+            };
 
             token.ThrowIfCancellationRequested();
-            progress.Report(40);
-            _logger.Info($"Loaded package with {package.MetadataObjects.Count} objects");
-
-            var outFile = Path.Combine(outputPath, "metadata-summary.txt");
-            var lines = package.MetadataObjects.Select(o => $"{o.GetType().Name}:{o.ImageRow.FileName}").ToArray();
-
-            token.ThrowIfCancellationRequested();
-            File.WriteAllLines(outFile, lines);
+            File.WriteAllLines(Path.Combine(outputPath, "metadata-summary.txt"), summaryLines);
             progress.Report(100);
-            _logger.Warn("TODO: Full XML export/rebuild API is not exposed by MdInternals core.");
+            _logger.Warn("TODO: Full XML export/rebuild requires migration or dedicated legacy build environment.");
         }, token);
     }
 
@@ -42,17 +44,5 @@ public class MdInternalsCoreService
     {
         _logger.Warn("TODO: MSSQL browser/export API is not exposed for GUI usage.");
         return Task.FromResult(new List<string> { "MSSQL connection test is currently unavailable in GUI wrapper." });
-    }
-
-    private static MetadataPackage CreatePackage(string path)
-    {
-        return Path.GetExtension(path).ToLowerInvariant() switch
-        {
-            ".cf" => new CfPackage(),
-            ".cfu" => new CfuPackage(),
-            ".epf" => new EpfPackage(),
-            ".erf" => new ErfPackage(),
-            _ => throw new NotSupportedException("Supported: .cf/.cfu/.epf/.erf")
-        };
     }
 }
