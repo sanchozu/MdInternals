@@ -23,7 +23,10 @@ public class MainViewModel
 
     public async Task RunConvertAsync(string input, string output)
     {
+        _cts?.Cancel();
+        _cts?.Dispose();
         _cts = new CancellationTokenSource();
+
         StatusUpdated?.Invoke(this, "Conversion in progress");
         var progress = new Progress<int>(p => ProgressUpdated?.Invoke(this, p));
         try { await _core.ExportToXmlAsync(input, output, true, true, progress, _cts.Token); }
@@ -33,12 +36,8 @@ public class MainViewModel
     }
 
     public Task<string> RunDecompilerAsync(string input) => _core.DecompileOpCodeAsync(input, _settings.DefaultEncoding);
-    public async Task TestDbAsync(TreeView tree)
-    {
-        tree.Nodes.Clear();
-        var items = await _core.TestAndListDbObjectsAsync();
-        foreach (var item in items) tree.Nodes.Add(item);
-    }
+    public Task<List<string>> GetDbObjectsAsync() => _core.TestAndListDbObjectsAsync();
+
     public void CancelCurrent() => _cts?.Cancel();
     public void SaveSettings() => _settings.Save(_logger);
     public void ClearLog() => _logger.Clear();

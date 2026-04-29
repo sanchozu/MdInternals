@@ -11,14 +11,22 @@ public class MdInternalsCoreService
     {
         await Task.Run(() =>
         {
+            token.ThrowIfCancellationRequested();
             if (!File.Exists(inputPath)) throw new FileNotFoundException("Input file not found", inputPath);
             Directory.CreateDirectory(outputPath);
-            MetadataPackage package = CreatePackage(inputPath);
+
+            using MetadataPackage package = CreatePackage(inputPath);
             package.Open(inputPath);
+
+            token.ThrowIfCancellationRequested();
             progress.Report(40);
             _logger.Info($"Loaded package with {package.MetadataObjects.Count} objects");
+
             var outFile = Path.Combine(outputPath, "metadata-summary.txt");
-            File.WriteAllLines(outFile, package.MetadataObjects.Select(o => $"{o.GetType().Name}:{o.ImageRow.FileName}"));
+            var lines = package.MetadataObjects.Select(o => $"{o.GetType().Name}:{o.ImageRow.FileName}").ToArray();
+
+            token.ThrowIfCancellationRequested();
+            File.WriteAllLines(outFile, lines);
             progress.Report(100);
             _logger.Warn("TODO: Full XML export/rebuild API is not exposed by MdInternals core.");
         }, token);

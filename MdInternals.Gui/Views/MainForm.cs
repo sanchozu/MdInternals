@@ -63,7 +63,12 @@ public class MainForm : Form
         var test = new Button { Left = 10, Top = 10, Width = 150, Text = "Тест соединения" };
         var password = new TextBox { Left = 10, Top = 45, Width = 250, UseSystemPasswordChar = true, PlaceholderText = "Пароль" };
         var tree = new TreeView { Left = 10, Top = 80, Width = 450, Height = 450 };
-        test.Click += async (_, _) => await _vm.TestDbAsync(tree);
+        test.Click += async (_, _) =>
+        {
+            tree.Nodes.Clear();
+            var items = await _vm.GetDbObjectsAsync();
+            foreach (var item in items) tree.Nodes.Add(item);
+        };
         page.Controls.AddRange([test, password, tree]);
         return page;
     }
