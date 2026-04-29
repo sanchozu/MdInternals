@@ -1,0 +1,14 @@
+bin/
+obj/
+publish/
+Release/
+Debug/
+*.exe
+*.dll
+*.pdb
+*.zip
+*.7z
+*.nupkg
+*.user
+*.suo
+.vs/
