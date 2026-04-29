@@ -1,0 +1,38 @@
+name: Build MdInternals GUI Release
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - feature/**
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build-gui:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '6.0.x'
+
+      - name: Restore GUI project
+        run: dotnet restore MdInternals.Gui/MdInternals.Gui.csproj
+
+      - name: Build GUI project
+        run: dotnet build MdInternals.Gui/MdInternals.Gui.csproj -c Release --no-restore
+
+      - name: Publish GUI binary
+        run: dotnet publish MdInternals.Gui/MdInternals.Gui.csproj -c Release -r win-x64 -p:PublishSingleFile=true -p:SelfContained=false --output publish
+
+      - name: Upload publish artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MdInternals.Gui-win-x64
+          path: publish/
